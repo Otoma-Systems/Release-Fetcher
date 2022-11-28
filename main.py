@@ -1,4 +1,5 @@
-from requests import get, session
+from requests import get
+from OtoPy import UsefulTools
 
 CONFIG = {
 "repo_owner" : "mogsoftware",
@@ -26,11 +27,20 @@ for asset in get(latestReleaseJson["assets_url"], headers=HEADER).json():
         latestReleaseZipUrl = asset["url"]
         break
 
-print(f"Downloading: {latestTagName}.zip with link: {latestReleaseZipUrl}")
-
 HEADER["Accept"] = 'application/octet-stream'
-streamFile = get(latestReleaseZipUrl, headers=HEADER)
-with open(CONFIG['download_path'] + fileName, "wb") as file:
-    file.write(streamFile.content)
 
-print("Download completed!")
+print(f"Downloading: {latestTagName}.zip")
+streamFile = get(latestReleaseZipUrl, stream=True, headers=HEADER)
+contentLength = streamFile.headers.get('content-length')
+donwloadProgress = UsefulTools.OTimedProgressBar(completeState = int(contentLength))
+
+with open(CONFIG['download_path'] + fileName, "wb") as file:
+    if contentLength is None:
+        file.write(streamFile.content)
+    else:
+        dataLenght = 0
+        contentLength = int(contentLength)
+        for data in streamFile.iter_content(chunk_size=4096):
+            dataLenght += len(data)
+            file.write(data)
+            donwloadProgress.PrintProgress(int(dataLenght))
