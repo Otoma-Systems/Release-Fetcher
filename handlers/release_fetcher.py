@@ -1,4 +1,5 @@
 from requests import get
+from os.path import dirname
 
 class ReleaseFetcher():
     def __init__(self, CONFIG):
@@ -11,7 +12,7 @@ class ReleaseFetcher():
         self.releaseVersion = release.get("version", "latest")
         self.releaseSufix = release.get("sufix", None)
 
-    def GetReleaseAssetsDetais(self):
+    def GetReleaseAssets(self):
         if self.repositoryOwner == None or self.repositoryName == None:
             return {"code": 1, "error_message": "Repository settings missing"}
 
@@ -40,10 +41,11 @@ class ReleaseFetcher():
         for file in self.files:
             fileDetais = file.get("file_detais", {})
             unzipperSettings = file.get("unzipper_settings", {})
-            downloadHeader = HEADER
 
             fileName = fileDetais.get("name") if fileDetais.get("name", None) != None else releaseTagName
             fileNameWithExtension = f"{fileName}.{fileDetais.get('extension', 'zip')}"
+            downloadPath = fileDetais.get("download_path", f"{dirname(__file__)}/..//Downloads/")
+            TargetPath = fileDetais.get("targer_path", f"{dirname(__file__)}/..//Unziped_Release/")
 
             for asset in get(releaseAssetsUrls, headers=HEADER).json():
                 if asset["name"] == fileNameWithExtension:
@@ -52,10 +54,12 @@ class ReleaseFetcher():
             assetsDetails.append(
                                     {
                                         "file_name": fileNameWithExtension,
-                                        "download_link":{
+                                        "download_details":{
                                             "url": assetUrl,
                                             "header": DOWNLOAD_HEADER
                                         },
+                                        "download_path": downloadPath,
+                                        "targer_path": TargetPath,
                                         "unzipperSettings": unzipperSettings
                                     }
                                 )

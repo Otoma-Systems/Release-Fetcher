@@ -17,8 +17,8 @@ class Settings():
                 "file_detais": { 
                     "extension": "zip",
                     "name": None,
-                    "download_path": "/Downloads",
-                    "targer_path": "/Unziped_Release"
+                    "download_path": f"{dirname(__file__)}/../Downloads/".replace("\\\\", "/").replace("\\", "/"),
+                    "targer_path": f"{dirname(__file__)}/../Unziped_Release/".replace("\\\\", "/").replace("\\", "/")
                 },
                 "unzipper_settings": {
                     "overwirte_files": False,
