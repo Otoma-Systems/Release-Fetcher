@@ -1,4 +1,5 @@
 from requests import get
+from os import makedirs
 from OtoPy import UsefulTools
 
 class Downloader():
@@ -13,7 +14,8 @@ class Downloader():
         streamFile = get(url, stream=True, headers=header)
         contentLength = streamFile.headers.get('content-length')
         donwloadProgress = UsefulTools.OTimedProgressBar(completeState = int(contentLength))
-        
+
+        makedirs(downloadPath, exist_ok=True)
         with open(f"{downloadPath}{fileName}", "wb") as file:
             if contentLength is None:
                 file.write(streamFile.content)
