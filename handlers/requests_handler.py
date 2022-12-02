@@ -22,11 +22,10 @@ class ReleaseFetcher():
         if self.repositoryToken != None:
             HEADER["Authorization"] = f"token {self.repositoryToken}"
             DOWNLOAD_HEADER["Authorization"] = f"token {self.repositoryToken}"
-        
 
         releaseData = get(URL, headers=HEADER).json()
-        if releaseData.get("message", None) == "Not Found":
-            return {"code": 2, "error_message": "Repository not found"}
+        if releaseData.get("message", None) != None:
+            return {"code": 2, "error_message": releaseData}
 
         releaseTagName = releaseData.get('tag_name', None)
         if releaseTagName == None:

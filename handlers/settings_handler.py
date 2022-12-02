@@ -21,7 +21,6 @@ class Settings():
                     "targer_path": f"{dirname(__file__)}/../Unziped_Release/".replace("\\\\", "/").replace("\\", "/")
                 },
                 "unzipper_settings": {
-                    "overwirte_files": False,
                     "unzip_release": False,
                     "clean_target_before_unzip": False
                 }

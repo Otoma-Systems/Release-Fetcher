@@ -1,6 +1,7 @@
 from requests import get
 from os import makedirs
-from OtoPy import UsefulTools
+from handlers.unzipper_handler import Unzipper
+from OtoPy.UsefulTools import OTimedProgressBar, OLogger
 
 class Downloader():
     def DownloadAsset(self, assetDetails):
@@ -13,7 +14,7 @@ class Downloader():
         print(f"Downloading: {fileName}")
         streamFile = get(url, stream=True, headers=header)
         contentLength = streamFile.headers.get('content-length')
-        donwloadProgress = UsefulTools.OTimedProgressBar(completeState = int(contentLength))
+        donwloadProgress = OTimedProgressBar(completeState = int(contentLength))
 
         makedirs(downloadPath, exist_ok=True)
         with open(f"{downloadPath}{fileName}", "wb") as file:
@@ -27,5 +28,7 @@ class Downloader():
                     file.write(data)
                     donwloadProgress.PrintProgress(int(dataLenght))
         
-        if unzipRelease:
-            pass
+
+        if unzipRelease and assetDetails.get("file_name").__contains__(".zip"):
+            unzipper = Unzipper()
+            unzipper.UnzipFile(assetDetails)
