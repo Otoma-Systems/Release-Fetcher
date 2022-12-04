@@ -40,7 +40,7 @@ class Settings():
                 "file_settings": {
                     "name": None,
                     "extension": "exe",
-                    "overwrite_downloaded_files": True
+                    "download_path": "./"
                 }
             }
         ]
