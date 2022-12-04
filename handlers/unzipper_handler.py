@@ -1,7 +1,7 @@
-from zipfile import ZipFile, ZipInfo
+from zipfile import ZipFile
 from os import makedirs, remove
 from os.path import exists
-from shutil import rmtree, copyfileobj
+from shutil import rmtree
 from OtoPy.UsefulTools import OTimedProgressBar
 
 class Unzipper():
@@ -12,7 +12,6 @@ class Unzipper():
 
         filePath = f"{fileSettings['download_path']}{downloadDetails['file_name']}"
         targetPath = unzipperSettings['unzip_targer_path']
-        chunkSize = 1048576
 
         if unzipperSettings['separated_folder_to_unzip']: 
             if unzipperSettings['separated_folder_to_unzip'] == True:
@@ -36,32 +35,18 @@ class Unzipper():
             with ZipFile(filePath, "r") as zipFile:
                 zipSize = sum([size.file_size for size in zipFile.filelist])
                 filesList = zipFile.filelist
-                currentFilesSize = 0
-                foldersCount = 0
-                filesCount = 0
-                unzipProgress = OTimedProgressBar(completeState = int(zipSize), fill='❚', suffix="Unzipped  ")
+                filesCount = len(filesList)
+                unzipProgress = OTimedProgressBar(completeState = filesCount, fill='❚', suffix="Unzipped  ")
 
-                for file in filesList:
-                    if file.filename[-1] == "/":
-                        makedirs(targetPath + file.filename, exist_ok=True)
-                        foldersCount += 1
-                    else:
-                        with zipFile.open(file.filename, "r") as fileToRead:
-                            with open(targetPath + file.filename, "wb") as fileToWrite:
-                                filesCount += 1
-                                while True:
-                                    fileChunk = fileToRead.read(chunkSize)
-                                    if not fileChunk: break
-                                    fileToWrite.write(fileChunk)
-                                    currentFilesSize += len(fileChunk)
-                                    unzipProgress.PrintProgress(currentFilesSize)
+                for fileCount, file in enumerate(filesList):
+                    zipFile.extract(file.filename, path=targetPath)
+                    unzipProgress.PrintProgress(fileCount+1)
 
             if not releaseAlreadyExists:
                 with open(f"{targetPath}RELEASE_VERSION", "w") as versionFile:
                     versionFile.write(downloadDetails["release_name"])
 
-            print(f"Number of Folders unzipped: {foldersCount}, Number of Files unzipped: {filesCount}.")
-            print(f"Total size of unzipped files: {round((zipSize / 1048576), 2)} Mb.")
+            print(f"Folders and Files unzipped: {filesCount}, Total size of unzipped files: {round((zipSize / 1048576), 2)} Mb.")
 
         else: print(f"File {downloadDetails['file_name']} already unzipped, as directed in configs will not be unzipped again.")
 
