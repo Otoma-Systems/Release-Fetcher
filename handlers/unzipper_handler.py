@@ -3,38 +3,46 @@ from os import makedirs
 from OtoPy.UsefulTools import OTimedProgressBar
 
 class Unzipper():
-    def UnzipFile(self, assetDetails):
-        filePath = f"{assetDetails.get('download_path')}{assetDetails.get('file_name')}"
-        fileName = assetDetails.get('file_name')
-        unzipPath = assetDetails.get("targer_path")
-        cleanTargetBeforeUnzip = assetDetails.get("unzipperSettings").get("clean_target_before_unzip")
+    def UnzipFile(self, fileToUnzip):
+        downloadDetails = fileToUnzip.get("download_details",{})
+        fileSettings = fileToUnzip.get("file_settings",{})
+        unzipperSettings = fileToUnzip.get("unzipper_settings",{})
 
-        print(f"Unzipping: {fileName}")
+        filePath = f"{fileSettings['download_path']}{downloadDetails['file_name']}"
+        targetPath = unzipperSettings['unzip_targer_path']
+        chunkSize = 1048576
 
-        makedirs(unzipPath, exist_ok=True)
+        if unzipperSettings['separated_folder_to_unzip']: 
+            if unzipperSettings['separated_folder_to_unzip'] == True:
+                targetPath += f"{downloadDetails['file_name'][:-4]}/"
+            else: 
+                targetPath += f"{unzipperSettings['separated_folder_to_unzip']}/"
+        print("-----------------------------------------------------------------------------------------------------------------------")
+        print(f"Unzipping: {downloadDetails['file_name']} on: \"{targetPath}\"")
+
+        makedirs(targetPath, exist_ok=True)
         with ZipFile(filePath, "r") as zipFile:
             zipSize = sum([size.file_size for size in zipFile.filelist])
-            mbSize = 1048576
             filesList = zipFile.filelist
-            progressSize = 0
+            currentFilesSize = 0
             foldersCount = 0
             filesCount = 0
             unzipProgress = OTimedProgressBar(completeState = int(zipSize))
 
             for file in filesList:
                 if file.filename[-1] == "/":
-                    makedirs(unzipPath + file.filename, exist_ok=True)
+                    makedirs(targetPath + file.filename, exist_ok=True)
                     foldersCount += 1
                 else:
-                    filesCount += 1
                     with zipFile.open(file.filename, "r") as fileToRead:
-                        with open(unzipPath + file.filename, "wb") as fileToWrite:
+                        with open(targetPath + file.filename, "wb") as fileToWrite:
+                            filesCount += 1
                             while True:
-                                fileChunk = fileToRead.read(mbSize)
+                                fileChunk = fileToRead.read(chunkSize)
                                 if not fileChunk: break
                                 fileToWrite.write(fileChunk)
-                                progressSize += len(fileChunk)
-                                unzipProgress.PrintProgress(progressSize)
+                                currentFilesSize += len(fileChunk)
+                                unzipProgress.PrintProgress(currentFilesSize)
 
             print(f"Number of Folders Unziped: {foldersCount}, Number of Files Unziped: {filesCount}")
-            print(f"Total size of unziped files: {round((zipSize / mbSize), 2)} Mb")
+            print(f"Total size of unziped files: {round((zipSize / 1048576), 2)} Mb")

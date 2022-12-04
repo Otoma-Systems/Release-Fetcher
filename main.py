@@ -1,23 +1,20 @@
 from handlers.settings_handler import Settings
-from handlers.requests_handler import ReleaseFetcher
-from handlers.downloads_handler import Downloader
+from handlers.github_handler import GithubHandler
 from handlers.unzipper_handler import Unzipper
 from handlers.tools_handler import WaitKeyToClose
 
 
 configSettings = Settings()
-if not configSettings.IniciateConfig():
-    WaitKeyToClose("No configuration detected so a template config.json was created in the main folder")
+if not configSettings.InicialConfig():
+    WaitKeyToClose("Please edit the new 'config.json' file created in the root folder and execute again")
+githubHandler = GithubHandler(configSettings.settings)
 
-releaseFetcher = ReleaseFetcher(configSettings.CONFIG)
-fileDownloader = Downloader()
-
-allAssets = releaseFetcher.GetReleaseAssets()
+allAssets = githubHandler.GetReleaseAssets()
 
 if type(allAssets) != list:
-    WaitKeyToClose(type(allAssets))
+    WaitKeyToClose(allAssets)
 else:
     for asset in allAssets:
-        fileDownloader.DownloadAsset(asset)
+        githubHandler.DownloadAsset(asset)
 
-    WaitKeyToClose("Finished running")
+WaitKeyToClose("Finished running")
