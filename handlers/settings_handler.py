@@ -1,5 +1,6 @@
 from json import load, dumps
 from os.path import exists
+from handlers.tools_handler import CompareTwoDicts
 
 class Settings():
     releaseFetcherTemplate = {
@@ -19,8 +20,9 @@ class Settings():
         },
         "default_file_settings" : {
             "file_settings": { 
-                    "name": None,  
+                    "name": None, 
                     "extension": "zip",
+                    "contains_in_name": None,
                     "download_path": "./Downloaded_Assets/",
                     "overwrite_downloaded_files": False,
                     "unzip_file": False
@@ -59,9 +61,7 @@ class Settings():
                 exstingConfig = load(configFile)
 
             #Normalize settings from config.json adding any missing configuration
-            self.settings = Settings.configTemplate | exstingConfig
-            for dictKey in set(Settings.configTemplate):
-                self.settings[dictKey] = Settings.configTemplate.get(dictKey) | exstingConfig.get(dictKey, {})
+            self.settings = CompareTwoDicts(Settings.configTemplate, exstingConfig)
 
             #Write normalized settings to config.json
             with open(self.configJsonPath, "w") as templateConfigFile:

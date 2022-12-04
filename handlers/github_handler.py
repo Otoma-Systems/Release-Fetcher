@@ -2,7 +2,7 @@ from requests import get
 from os import makedirs, path, remove
 from handlers.unzipper_handler import Unzipper
 from OtoPy.UsefulTools import OTimedProgressBar
-from handlers.tools_handler import WaitKeyToClose
+from handlers.tools_handler import WaitKeyToClose, CompareTwoDicts
 
 class GithubHandler():
     def __init__(self, settings):
@@ -34,8 +34,6 @@ class GithubHandler():
                     releaseData = release
                     break
             else: releaseData = {}
-                
-
 
         releaseTagName = releaseData.get('tag_name')
         if not releaseTagName:
@@ -50,16 +48,22 @@ class GithubHandler():
 
         if self.files:
             for file in self.files:
-                for dictKey in set(self.defaultFileSettings):
-                    file[dictKey] = self.defaultFileSettings.get(dictKey) | file.get(dictKey, {})
+                #Normalize settings from file adding any missing details
+                file = CompareTwoDicts(self.defaultFileSettings, file)
 
                 fileSettings = file.get("file_settings", {})
-
-                fileName = fileSettings['name'] if fileSettings.get("name") else releaseTagName
-                fileNameWithExtension = f"{fileName}.{fileSettings['extension']}"
-
+                fileNameWithExtension = f"{fileSettings['name'] if fileSettings.get('name') else releaseTagName}.{fileSettings['extension']}"
+                    
                 for asset in allReleaseAssets:
-                    if asset["name"] == fileNameWithExtension:
+                    if fileSettings['contains_in_name']:
+                        assetContainsDinamicName = (
+                                (fileSettings['contains_in_name'] in asset["name"] if fileSettings['contains_in_name'] != True else releaseTagName in asset["name"])
+                                and fileSettings['extension'] == asset["name"][-len(fileSettings['extension']):]
+                            )
+                        fileNameWithExtension = asset["name"]
+                    else: assetContainsDinamicName = False
+
+                    if (asset["name"] == fileNameWithExtension or assetContainsDinamicName):
                         downloadDetails = {
                             "download_details":{
                                 "release_name": releaseData.get('tag_name'),
@@ -82,6 +86,8 @@ class GithubHandler():
                     }
                     assetsToDownload.append(self.defaultFileSettings | downloadDetails)
                     
+        if not assetsToDownload:
+            return {"code": 5, "error_message": f"No Assets Found for {releaseData.get('tag_name')} with the configured settings"}
         return assetsToDownload
 
     def DownloadAsset(self, assetToDownload):

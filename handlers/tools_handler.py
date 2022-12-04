@@ -2,16 +2,6 @@ import os
 import platform
 import sys
 
-def WaitKeyToClose(message):
-    print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-    print(message)
-    if platform.system() == "Windows":
-        os.system("pause")
-        sys.exit()
-    else:
-        os.system("/bin/bash -c 'read -s -n 1 -p \"Press any key to continue...\"'")
-        sys.exit()
-
 def PrepareWindow(width = "121", length = "45"):
     from os import system
     windowSize = f"mode {width},{length}"
@@ -50,3 +40,20 @@ def PrepareWindow(width = "121", length = "45"):
 
     for line in Logo:
         print(line)
+
+def WaitKeyToClose(message):
+    print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+    print(message)
+    if platform.system() == "Windows":
+        os.system("pause")
+        sys.exit()
+    else:
+        os.system("/bin/bash -c 'read -s -n 1 -p \"Press any key to continue...\"'")
+        sys.exit()
+
+def CompareTwoDicts(slaveDict, masterDict):
+    dictUnion = slaveDict | masterDict
+    for dictKey in set(slaveDict):
+        if type(slaveDict.get(dictKey)) is dict:
+            dictUnion[dictKey] = CompareTwoDicts(slaveDict[dictKey], masterDict.get(dictKey, {}))
+    return dictUnion

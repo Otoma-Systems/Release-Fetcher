@@ -1,7 +1,7 @@
 from zipfile import ZipFile, ZipInfo
 from os import makedirs, remove
 from os.path import exists
-from shutil import rmtree
+from shutil import rmtree, copyfileobj
 from OtoPy.UsefulTools import OTimedProgressBar
 
 class Unzipper():

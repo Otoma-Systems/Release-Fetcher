@@ -7,10 +7,9 @@ PrepareWindow()
 configSettings = Settings()
 if not configSettings.InicialConfig():
     WaitKeyToClose("Please edit the new 'config.json' file created in the root folder and execute again.")
+
 githubHandler = GithubHandler(configSettings.settings)
-
 allAssets = githubHandler.GetReleaseAssets()
-
 if type(allAssets) != list:
     WaitKeyToClose(allAssets)
 else:
