@@ -1,5 +1,5 @@
 from json import load, dumps
-from os.path import exists, dirname
+from os.path import exists
 
 class Settings():
     releaseFetcherTemplate = {

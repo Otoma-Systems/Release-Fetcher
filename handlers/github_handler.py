@@ -1,7 +1,7 @@
 from requests import get
 from os import makedirs, path
 from handlers.unzipper_handler import Unzipper
-from OtoPy.UsefulTools import OTimedProgressBar, OLogger
+from OtoPy.UsefulTools import OTimedProgressBar
 
 class GithubHandler():
     def __init__(self, settings):
