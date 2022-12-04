@@ -1,6 +1,6 @@
 *.json
-/Downloads/
-/Unziped_Release/
+/Downloaded_Assets/
+/Unziped_Assets/
 
 # Editors
 .vscode/

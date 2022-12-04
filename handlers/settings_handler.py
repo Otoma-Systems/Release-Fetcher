@@ -15,8 +15,7 @@ class Settings():
             "token": ""
         },
         "release": {
-            "version": "latest",
-            "sufix": None
+            "pre-release_identifier": None
         },
         "default_file_settings" : {
             "file_settings": { 
@@ -38,12 +37,10 @@ class Settings():
     filesTemplate ={
         "files":[
             {
-                "file_settings": { 
+                "file_settings": {
                     "name": None,
-                    "extension": "exe"                   
-                },
-                "unzipper_settings": {
-                    "overwrite_unziped_files": True
+                    "extension": "exe",
+                    "overwrite_downloaded_files": True
                 }
             }
         ]
@@ -54,10 +51,10 @@ class Settings():
         self.settings = {}
 
     def InicialConfig(self) -> bool:
-        print("-----------------------------------------------------------------------------------------------------------------------")
+        print("╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍")
         if exists(self.configJsonPath):
             #Get settings from config.json
-            print("Config file detected. Reading existing configuration")
+            print("Config file detected. Reading existing configuration.")
             with open(self.configJsonPath, "r") as configFile:
                 exstingConfig = load(configFile)
 
@@ -70,11 +67,11 @@ class Settings():
             with open(self.configJsonPath, "w") as templateConfigFile:
                 templateConfigFile.write(dumps(self.settings, indent=4))
 
-            print("Config File was normalized with template in order to have all configurations if missing")
+            print("Config File was normalized with template in order to have all configurations if missing.")
             return True
 
         else:
-            print("No configuration file detected. Creating one as example")
+            print("No configuration file detected. Creating one as example.")
             #Write example settings to newly created
             templateJsonConfig = dumps(Settings.configTemplate | Settings.filesTemplate | Settings.releaseFetcherTemplate, indent=4)
             with open(self.configJsonPath, "w") as templateConfigFile:

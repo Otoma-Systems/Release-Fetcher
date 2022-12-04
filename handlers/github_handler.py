@@ -10,26 +10,35 @@ class GithubHandler():
         self.release = settings.get("release", {})
         self.files = settings.get("files", [])
 
-        releaseSufix = self.release['sufix']
-
     def GetReleaseAssets(self):
         if not self.repository['owner'] or not self.repository['name']:
             return {"code": 1, "error_message": "Repository settings missing"}
 
-        URL = f"https://api.github.com/repos/{self.repository['owner']}/{self.repository['name']}/releases/{self.release['version']}"
+        URL = f"https://api.github.com/repos/{self.repository['owner']}/{self.repository['name']}/releases"
         HEADER = {"Accept": "application/vnd.github+json"}
         DOWNLOAD_HEADER = {"Accept": "application/octet-stream"}
         if self.repository['token']:
             HEADER["Authorization"] = f"token {self.repository['token']}"
             DOWNLOAD_HEADER["Authorization"] = f"token {self.repository['token']}"
 
-        releaseData = get(URL, headers=HEADER).json()
-        if releaseData.get("message"):
-            return {"code": 2, "error_message": releaseData}
+        releasesData = get(URL, headers=HEADER).json()
+        if type(releasesData) != list:
+            return {"code": 2, "error_message": releasesData}
+        for release in releasesData:
+            if self.release.get("pre-release_identifier"):
+                if self.release.get("pre-release_identifier") in release["tag_name"]:
+                    releaseData = release
+                    break
+            elif release["tag_name"][-1].isdigit() and not "alpha" in release["tag_name"] and not "beta" in release["tag_name"] and not "pre-release" in release["tag_name"]:
+                    releaseData = release
+                    break
+            else: releaseData = {}
+                
+
 
         releaseTagName = releaseData.get('tag_name')
         if not releaseTagName:
-            return {"code": 3, "error_message": f"No {self.release['version']} Release Found"}
+            return {"code": 3, "error_message": f"No Release Found"}
 
         releaseAssetsUrls = releaseData.get("assets_url")
         if not releaseAssetsUrls:
@@ -52,6 +61,7 @@ class GithubHandler():
                     if asset["name"] == fileNameWithExtension:
                         downloadDetails = {
                             "download_details":{
+                                "release_name": releaseData.get('tag_name'),
                                 "file_name": fileNameWithExtension,
                                 "url": asset["url"],
                                 "header": DOWNLOAD_HEADER
@@ -63,6 +73,7 @@ class GithubHandler():
             for asset in allReleaseAssets:
                     downloadDetails = {
                         "download_details":{
+                            "release_name": releaseData.get('tag_name'),
                             "file_name": asset["name"],
                             "url": asset["url"],
                             "header": DOWNLOAD_HEADER
@@ -80,13 +91,12 @@ class GithubHandler():
         assetIsZip = downloadDetails['file_name'].__contains__(".zip")
         chunkSize = 524288
 
-        print("-----------------------------------------------------------------------------------------------------------------------")
+        print("╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍")
         if fileSettings['overwrite_downloaded_files'] or not assetExistsPriorDownload:
-            print(f"Downloading: {downloadDetails['file_name']} to: \"{fileSettings['download_path']}\"")
+            print(f"Downloading: {downloadDetails['file_name']} to: \"{fileSettings['download_path']}\".")
             streamFile = get(downloadDetails['url'], stream=True, headers=downloadDetails['header'])
             contentLength = streamFile.headers.get('content-length')
-            donwloadProgress = OTimedProgressBar(completeState = int(contentLength))
-
+            donwloadProgress = OTimedProgressBar(completeState = int(contentLength), fill='❚', suffix="Downloaded")
             makedirs(fileSettings['download_path'], exist_ok=True)
             with open(f"{fileSettings['download_path']}{downloadDetails['file_name']}", "wb") as file:
                 if not contentLength:
@@ -99,7 +109,7 @@ class GithubHandler():
                         donwloadProgress.PrintProgress(int(dataLenght))
         else: print(f"File {downloadDetails['file_name']} already exists, as directed in config will not be downloaded again.")
 
-        if assetIsZip and fileSettings['unzip_file'] and (fileSettings['overwrite_downloaded_files'] or unzipperSettings['overwrite_unziped_files'] or not assetExistsPriorDownload):
+        if assetIsZip and fileSettings['unzip_file']:
             unzipper = Unzipper()
             unzipper.UnzipFile(assetToDownload)
-        else: print(f"File {downloadDetails['file_name']} already exists, as directed in configs will not be unzipped again.")
+        elif fileSettings['unzip_file']: print(f"File {downloadDetails['file_name']} is not a zip to be unzipped.")
