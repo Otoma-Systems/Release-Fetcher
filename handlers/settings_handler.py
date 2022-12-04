@@ -5,7 +5,7 @@ class Settings():
     releaseFetcherTemplate = {
         "repository": {
             "owner": "Otoma-Systems",
-            "name": "Release_Fetcher"
+            "name": "Release-Fetcher"
         }
     }
     configTemplate = {

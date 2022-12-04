@@ -1,7 +1,8 @@
 from requests import get
-from os import makedirs, path
+from os import makedirs, path, remove
 from handlers.unzipper_handler import Unzipper
 from OtoPy.UsefulTools import OTimedProgressBar
+from handlers.tools_handler import WaitKeyToClose
 
 class GithubHandler():
     def __init__(self, settings):
@@ -98,15 +99,22 @@ class GithubHandler():
             contentLength = streamFile.headers.get('content-length')
             donwloadProgress = OTimedProgressBar(completeState = int(contentLength), fill='❚', suffix="Downloaded")
             makedirs(fileSettings['download_path'], exist_ok=True)
-            with open(f"{fileSettings['download_path']}{downloadDetails['file_name']}", "wb") as file:
-                if not contentLength:
-                    file.write(streamFile.content)
-                else:
-                    dataLenght = 0
-                    for data in streamFile.iter_content(chunk_size=chunkSize):
-                        dataLenght += len(data)
-                        file.write(data)
-                        donwloadProgress.PrintProgress(int(dataLenght))
+
+            try:
+                with open(f"{fileSettings['download_path']}{downloadDetails['file_name']}", "wb") as file:
+                    if not contentLength:
+                        file.write(streamFile.content)
+                    else:
+                        dataLenght = 0
+                        for data in streamFile.iter_content(chunk_size=chunkSize):
+                            dataLenght += len(data)
+                            file.write(data)
+                            donwloadProgress.PrintProgress(int(dataLenght))
+            except :
+                print(f"\nClearing {downloadDetails['file_name']} because some error has occurred.")
+                remove(f"{fileSettings['download_path']}{downloadDetails['file_name']}")
+                WaitKeyToClose("!!! Execution interruped by exception !!!")
+
         else: print(f"File {downloadDetails['file_name']} already exists, as directed in config will not be downloaded again.")
 
         if assetIsZip and fileSettings['unzip_file']:

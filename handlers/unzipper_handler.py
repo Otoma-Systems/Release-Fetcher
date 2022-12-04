@@ -31,10 +31,6 @@ class Unzipper():
                 rmtree(f"{targetPath}")
             makedirs(targetPath, exist_ok=True)
 
-            if not releaseAlreadyExists:
-                    with open(f"{targetPath}RELEASE_VERSION", "w") as versionFile:
-                        versionFile.write(downloadDetails["release_name"])
-
             print(f"Unzipping: {downloadDetails['file_name']} on: \"{targetPath}\".")
 
             with ZipFile(filePath, "r") as zipFile:
@@ -60,8 +56,12 @@ class Unzipper():
                                     currentFilesSize += len(fileChunk)
                                     unzipProgress.PrintProgress(currentFilesSize)
 
-                print(f"Number of Folders Unziped: {foldersCount}, Number of Files Unziped: {filesCount}.")
-                print(f"Total size of unziped files: {round((zipSize / 1048576), 2)} Mb.")
+            if not releaseAlreadyExists:
+                with open(f"{targetPath}RELEASE_VERSION", "w") as versionFile:
+                    versionFile.write(downloadDetails["release_name"])
+
+            print(f"Number of Folders Unziped: {foldersCount}, Number of Files Unziped: {filesCount}.")
+            print(f"Total size of unziped files: {round((zipSize / 1048576), 2)} Mb.")
 
         else: print(f"File {downloadDetails['file_name']} already unziped, as directed in configs will not be unzipped again.")
 

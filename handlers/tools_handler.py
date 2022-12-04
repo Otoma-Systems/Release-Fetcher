@@ -1,15 +1,16 @@
 import os
 import platform
+import sys
 
 def WaitKeyToClose(message):
     print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
     print(message)
     if platform.system() == "Windows":
         os.system("pause")
-        exit()
+        sys.exit()
     else:
         os.system("/bin/bash -c 'read -s -n 1 -p \"Press any key to continue...\"'")
-        exit()
+        sys.exit()
 
 def PrepareWindow(width = "121", length = "45"):
     from os import system
