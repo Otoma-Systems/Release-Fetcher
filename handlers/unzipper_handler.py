@@ -42,7 +42,7 @@ class Unzipper():
                     zipFile.extract(file.filename, path=targetPath)
                     unzipProgress.PrintProgress(fileCount+1)
 
-            if not releaseAlreadyExists:
+            if not releaseAlreadyExists or unzipperSettings["clear_target_before_unzip"]:
                 with open(f"{targetPath}RELEASE_VERSION", "w") as versionFile:
                     versionFile.write(downloadDetails["release_name"])
 
