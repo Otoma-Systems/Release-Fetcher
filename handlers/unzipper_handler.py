@@ -25,7 +25,7 @@ class Unzipper():
                 releaseAlreadyExists = bool(versionFile.read() == downloadDetails["release_name"])
         else: releaseAlreadyExists = False
 
-        if unzipperSettings['overwrite_unziped_files'] or not releaseAlreadyExists:         
+        if unzipperSettings['overwrite_unzipped_files'] or not releaseAlreadyExists:         
             if unzipperSettings["clear_target_before_unzip"] and exists(targetPath):
                 print(f"Clearing \"{targetPath}\" before unziping, as requested in config.")
                 rmtree(f"{targetPath}")
@@ -60,10 +60,10 @@ class Unzipper():
                 with open(f"{targetPath}RELEASE_VERSION", "w") as versionFile:
                     versionFile.write(downloadDetails["release_name"])
 
-            print(f"Number of Folders Unziped: {foldersCount}, Number of Files Unziped: {filesCount}.")
-            print(f"Total size of unziped files: {round((zipSize / 1048576), 2)} Mb.")
+            print(f"Number of Folders unzipped: {foldersCount}, Number of Files unzipped: {filesCount}.")
+            print(f"Total size of unzipped files: {round((zipSize / 1048576), 2)} Mb.")
 
-        else: print(f"File {downloadDetails['file_name']} already unziped, as directed in configs will not be unzipped again.")
+        else: print(f"File {downloadDetails['file_name']} already unzipped, as directed in configs will not be unzipped again.")
 
         if unzipperSettings["delete_zip_after_unzip"]:
                 remove(filePath)

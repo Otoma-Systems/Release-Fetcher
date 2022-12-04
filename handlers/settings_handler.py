@@ -29,8 +29,8 @@ class Settings():
                     "delete_zip_after_unzip": False,
                     "separated_folder_to_unzip": False,
                     "clear_target_before_unzip": False,
-                    "overwrite_unziped_files": False,
-                    "unzip_targer_path": "./Unziped_Assets/"
+                    "overwrite_unzipped_files": False,
+                    "unzip_targer_path": "./unzipped_Assets/"
                 }
         }
     }
