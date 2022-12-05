@@ -12,6 +12,7 @@ class Unzipper():
 
         filePath = f"{fileSettings['download_path']}{downloadDetails['file_name']}"
         targetPath = unzipperSettings['unzip_targer_path']
+        versionName = f"{downloadDetails['release_name']}--{(34-len(downloadDetails['release_name']))*'-'}{downloadDetails['file_name']}"
 
         if unzipperSettings['separated_folder_to_unzip']: 
             if unzipperSettings['separated_folder_to_unzip'] == True:
@@ -21,7 +22,7 @@ class Unzipper():
 
         if exists(f"{targetPath}RELEASE_VERSION"):
             with open(f"{targetPath}RELEASE_VERSION", "r") as versionFile:
-                releaseAlreadyExists = bool(versionFile.read() == downloadDetails["release_name"])
+                releaseAlreadyExists = versionName in versionFile.read()
         else: releaseAlreadyExists = False
 
         if unzipperSettings['overwrite_unzipped_files'] or not releaseAlreadyExists:         
@@ -42,11 +43,12 @@ class Unzipper():
                     zipFile.extract(file.filename, path=targetPath)
                     unzipProgress.PrintProgress(fileCount+1)
 
-            if not releaseAlreadyExists or unzipperSettings["clear_target_before_unzip"]:
-                with open(f"{targetPath}RELEASE_VERSION", "w") as versionFile:
-                    versionFile.write(downloadDetails["release_name"])
+                print(f"Folders and Files unzipped: {filesCount}, Total size of unzipped files: {round((zipSize / 1048576), 2)} Mb.")
 
-            print(f"Folders and Files unzipped: {filesCount}, Total size of unzipped files: {round((zipSize / 1048576), 2)} Mb.")
+            if not releaseAlreadyExists or unzipperSettings["clear_target_before_unzip"]:
+                with open(f"{targetPath}RELEASE_VERSION", "a") as versionFile:
+                    versionFile.write(f"\n{versionName}")
+                print(f"Adding Release asset version to RELEASE_VERSION File. If file doesn't exist, it will be created.")
 
         else: print(f"File {downloadDetails['file_name']} already unzipped, as directed in configs will not be unzipped again.")
 
