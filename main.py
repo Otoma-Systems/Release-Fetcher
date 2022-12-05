@@ -1,8 +1,8 @@
 from handlers.settings_handler import Settings
 from handlers.github_handler import GithubHandler
-from handlers.tools_handler import WaitKeyToClose, PrepareWindow
+from handlers.tools_handler import WaitKeyToClose, PrintLogo
 
-PrepareWindow()
+PrintLogo()
 
 configSettings = Settings()
 if not configSettings.InicialConfig():
@@ -16,4 +16,4 @@ else:
     for asset in allAssets:
         githubHandler.DownloadAsset(asset)
 
-WaitKeyToClose("!!! Finished running !!!")
+WaitKeyToClose("!!! Finished running, Will close automatically in 10 seconds !!!")
